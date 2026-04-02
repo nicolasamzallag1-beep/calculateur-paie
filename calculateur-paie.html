@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur de paie — Hard Boat XXL 04.04.2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Helvetica,Arial,sans-serif;background:#f4f4f4;color:#222;padding:16px}
+h1{font-size:18px;font-weight:600;text-align:center;margin-bottom:4px}
+.sub{font-size:13px;color:#666;text-align:center;margin-bottom:20px}
+.rates{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;justify-content:center}
+.rate-box{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:14px}
+.rate-box input{width:60px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:14px;text-align:right}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;text-align:center}
+.card-label{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.card-value{font-size:22px;font-weight:600}
+.cv-blue{color:#1a6fc4}
+.cv-gold{color:#b47a10}
+.table-wrap{background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
+thead th{background:#f8f8f8;padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:1px solid #e0e0e0;font-weight:600}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid #f0f0f0}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fafafa}
+tbody td{padding:8px 10px;vertical-align:middle}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.bsa{background:#dce8f5;color:#0c447c}
+.bae{background:#faeeda;color:#633806}
+tfoot td{font-weight:600;background:#f8f8f8;padding:9px 10px;border-top:1px solid #e0e0e0}
+tfoot td.r{text-align:right}
+input[type=number]{background:#fff;color:#222}
+@media(max-width:500px){h1{font-size:15px}.card-value{font-size:18px}}
+</style>
+</head>
+<body>
+
+<h1>Calculateur de paie — Hard Boat XXL</h1>
+<p class="sub">Parcexpo · Villefranche-sur-Saône · 04.04.2026</p>
+
+<div class="rates">
+  <div class="rate-box">
+    <span>Taux salarié :</span>
+    <input type="number" id="rsa" value="13" min="0" step="0.5"> €/h net
+  </div>
+  <div class="rate-box">
+    <span>Taux auto-entrepreneur :</span>
+    <input type="number" id="rae" value="21" min="0" step="0.5"> €/h HT
+  </div>
+</div>
+
+<div class="summary">
+  <div class="card"><div class="card-label">Staff total</div><div class="card-value">41</div></div>
+  <div class="card"><div class="card-label">Total heures</div><div class="card-value cv-blue" id="sh">0</div></div>
+  <div class="card"><div class="card-label">Masse salariale</div><div class="card-value cv-gold" id="sp">0,00 €</div></div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr>
+    <th>#</th><th>Nom — Prénom</th><th>Statut</th><th>H. conv.</th>
+    <th class="r">Heures</th><th class="r">Taux</th><th class="r">Total</th>
+  </tr></thead>
+  <tbody id="tb"></tbody>
+  <tfoot><tr>
+    <td colspan="4"></td>
+    <td class="r" id="fh">0 h</td>
+    <td></td>
+    <td class="r" id="fp">0,00 €</td>
+  </tr></tfoot>
+</table>
+</div>
+
+<script>
+const SA="Salarié",AE="Auto-entr.";
+const data=[
+  ["Bacon","Romain","18h",SA],["Banes","Michelle","21h",SA],
+  ["Barbet","Loona","18h",AE],["BARKA","Riyad","18h",SA],
+  ["Bastien","Paul","18h",SA],["Beau","Olivier","18h",SA],
+  ["Benkhoris","Elodie","18h",SA],["Billuart","Antoine","18h",AE],
+  ["Boucaud","Zoé","18h",SA],["Bouthenet","Manon","18h",SA],
+  ["CADOT","Marine","18h",SA],["CARRON","Titouan","18h",SA],
+  ["Chaintron","Charlotte","18h",AE],["DA SILVA","Alexandre","18h",SA],
+  ["Da Silva","Sonia","18h",AE],["De Pecol","Mickael","18h",SA],
+  ["Durand","Jennifer","18h",SA],["Duvert","Axelle","21h",SA],
+  ["Favre","Yoann","18h",AE],["Francoz","Florian","18h",AE],
+  ["GEOFFEOY","Méline","18h",SA],["Geoffroy","Jeanne","18h",SA],
+  ["Giroud","Clément","18h",AE],["Givord","Hugo","18h",AE],
+  ["Graffion","Fannie","18h",SA],["Humblot","Letitia","18h",AE],
+  ["Jacuszin","Laura","18h",SA],["Karabela-Kahveci","Ambrine","18h",SA],
+  ["Laffi","Rania","18h",SA],["Lemaille","Nadège","18h",AE],
+  ["Libourel","Hortense","18h",AE],["Macia","Marie","18h",SA],
+  ["Mathiot","Noémie","18h",SA],["Merle","Estelle","18h",SA],
+  ["Montreuil","Mackinlay","18h",SA],["Ratel","Valentine","18h",SA],
+  ["Roux","Alexandre","18h",SA],["Salut","Gabriel","18h",SA],
+  ["Silvy","Marie","18h",SA],["SIVASLEIAN","Alexandre","18h",AE],
+  ["Trouve","Guillaume","18h",AE]
+];
+const hrs=new Array(data.length).fill(0);
+const fmt=n=>n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const rsa=()=>parseFloat(document.getElementById('rsa').value)||13;
+const rae=()=>parseFloat(document.getElementById('rae').value)||21;
+const rate=s=>s===SA?rsa():rae();
+
+function build(){
+  const tb=document.getElementById('tb');
+  tb.innerHTML='';
+  data.forEach(([nom,prenom,hc,st],i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="color:#999;font-size:11px">${i+1}</td>
+      <td><strong>${nom}</strong> ${prenom}</td>
+      <td><span class="badge ${st===SA?'bsa':'bae'}">${st}</span></td>
+      <td style="color:#888">${hc}</td>
+      <td class="r"><input type="number" min="0" max="24" step="0.5" placeholder="0"
+        style="width:58px;text-align:right;padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px"
+        data-i="${i}" oninput="upd(this)"></td>
+      <td class="r" style="color:#888" id="rt${i}">${rate(st)} €</td>
+      <td class="r" style="color:#bbb" id="tt${i}">—</td>`;
+    tb.appendChild(tr);
+  });
+  refresh();
+}
+
+function upd(el){hrs[+el.dataset.i]=parseFloat(el.value)||0;refresh();}
+
+function refresh(){
+  let th=0,tp=0;
+  data.forEach(([,,_,st],i)=>{
+    const r=rate(st),h=hrs[i],pay=h*r;
+    th+=h;tp+=pay;
+    document.getElementById('rt'+i).textContent=r+' €';
+    const tc=document.getElementById('tt'+i);
+    tc.textContent=h>0?fmt(pay):'—';
+    tc.style.color=h>0?'#222':'#bbb';
+  });
+  document.getElementById('sh').textContent=th;
+  document.getElementById('sp').textContent=fmt(tp);
+  document.getElementById('fh').textContent=th+' h';
+  document.getElementById('fp').textContent=fmt(tp);
+}
+
+document.getElementById('rsa').addEventListener('input',refresh);
+document.getElementById('rae').addEventListener('input',refresh);
+build();
+</script>
+</body>
+</html>
