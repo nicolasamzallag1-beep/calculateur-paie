@@ -3,148 +3,531 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculateur de paie — Hard Boat XXL 04.04.2026</title>
+<title>Hard Boat XXL — Staff Manager 04.04.2026</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,Helvetica,Arial,sans-serif;background:#f4f4f4;color:#222;padding:16px}
-h1{font-size:18px;font-weight:600;text-align:center;margin-bottom:4px}
-.sub{font-size:13px;color:#666;text-align:center;margin-bottom:20px}
-.rates{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;justify-content:center}
-.rate-box{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:14px}
-.rate-box input{width:60px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:14px;text-align:right}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;text-align:center}
-.card-label{font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
-.card-value{font-size:22px;font-weight:600}
-.cv-blue{color:#1a6fc4}
-.cv-gold{color:#b47a10}
-.table-wrap{background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
-thead th{background:#f8f8f8;padding:9px 10px;text-align:left;font-size:12px;color:#555;border-bottom:1px solid #e0e0e0;font-weight:600}
+body{font-family:system-ui,Arial,sans-serif;background:#f0f2f5;color:#222;font-size:14px}
+
+/* HEADER */
+.app-header{background:#111;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.app-header h1{font-size:15px;font-weight:700;color:#f0c040;white-space:nowrap}
+.app-header .info{font-size:11px;color:#888}
+
+/* TABS */
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e8e8;padding:0 16px}
+.tab{padding:12px 20px;font-size:13px;font-weight:600;color:#888;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:#444}
+.tab.on{color:#1a6fc4;border-bottom-color:#1a6fc4}
+
+/* CONTENT */
+.pane{display:none;padding:16px}
+.pane.on{display:block}
+
+/* SUMMARY CARDS */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px;text-align:center}
+.card-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.card-val{font-size:20px;font-weight:700}
+.c-blue{color:#1a6fc4}.c-gold{color:#b47a10}.c-red{color:#c0392b}.c-green{color:#27ae60}
+
+/* RATES */
+.rates{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.rate-box{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:13px}
+.rate-box input{width:56px;padding:4px 6px;border:1px solid #ccc;border-radius:5px;font-size:13px;text-align:right}
+
+/* TOOLBAR */
+.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.btn{padding:6px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:#444}
+.btn:hover{background:#f5f5f5}
+.btn.on{background:#1a6fc4;color:#fff;border-color:#1a6fc4}
+.btn-gold{border-color:#b47a10;color:#b47a10;font-weight:600}
+.btn-gold:hover{background:#fffbf0}
+.btn-green{border-color:#27ae60;color:#27ae60;font-weight:600}
+.btn-green:hover{background:#f0fff4}
+
+/* AJOUT PANEL */
+.add-panel{background:#fff;border:1px solid #c3e6c3;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.add-panel h3{font-size:13px;font-weight:600;color:#27ae60;margin-bottom:12px}
+.add-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.add-form input[type=text]{flex:1;min-width:90px;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.add-form input[type=text]:focus{outline:none;border-color:#27ae60}
+.add-form select{padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff}
+.add-form .taux-lbl{font-size:13px;color:#888;white-space:nowrap}
+.btn-valider{background:#27ae60;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn-valider:hover{background:#219150}
+.btn-valider:disabled{background:#aaa;cursor:not-allowed}
+.add-msg{font-size:12px;margin-top:8px;padding:6px 10px;border-radius:5px;display:none}
+.add-msg.ok{display:block;background:#f0fff4;color:#27ae60;border:1px solid #c3e6c3}
+.add-msg.err{display:block;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6}
+.add-msg.loading{display:block;background:#f8f8f8;color:#888;border:1px solid #e8e8e8}
+
+/* TABLE PAIE */
+.tw{background:#fff;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:480px}
+thead th{background:#f8f8f8;padding:8px 10px;text-align:left;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid #eee}
 th.r,td.r{text-align:right}
-tbody tr{border-bottom:1px solid #f0f0f0}
+tbody tr{border-bottom:1px solid #f5f5f5}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:#fafafa}
+tbody tr.new-row td:first-child{border-left:3px solid #27ae60}
 tbody td{padding:8px 10px;vertical-align:middle}
+tfoot td{background:#f8f8f8;padding:9px 10px;font-weight:700;font-size:13px;border-top:2px solid #e8e8e8}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
 .bsa{background:#dce8f5;color:#0c447c}
 .bae{background:#faeeda;color:#633806}
-tfoot td{font-weight:600;background:#f8f8f8;padding:9px 10px;border-top:1px solid #e0e0e0}
-tfoot td.r{text-align:right}
-input[type=number]{background:#fff;color:#222}
-@media(max-width:500px){h1{font-size:15px}.card-value{font-size:18px}}
+.new-tag{display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle}
+input.hi{width:58px;text-align:right;padding:5px 6px;border:1px solid #ddd;border-radius:5px;font-size:13px}
+input.hi:focus{outline:none;border-color:#1a6fc4}
+input.hi.empty{border-color:#e8e8e8;color:#ccc}
+input.ri{width:52px;text-align:right;padding:4px 5px;border:1px solid #eee;border-radius:5px;font-size:12px;color:#555}
+input.ri:focus{outline:none;border-color:#b47a10}
+a.at{color:#222;text-decoration:none;border-bottom:1px dashed #ccc}
+a.at:hover{color:#1a6fc4}
+.at-ico{font-size:9px;opacity:.3;margin-left:2px}
+
+/* RÉPERTOIRE */
+.dir-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.dir-search{flex:1;min-width:180px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px}
+.dir-search:focus{outline:none;border-color:#1a6fc4}
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.dir-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px;cursor:pointer;transition:box-shadow .15s}
+.dir-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.08);border-color:#ccc}
+.dir-card .dc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dc-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.av-sa{background:#dce8f5;color:#0c447c}
+.av-ae{background:#faeeda;color:#633806}
+.dc-name{font-weight:600;font-size:13px;line-height:1.3}
+.dc-badge{font-size:10px}
+.dc-info{font-size:12px;color:#666;line-height:1.8}
+.dc-info a{color:#1a6fc4;text-decoration:none}
+.dc-info a:hover{text-decoration:underline}
+.dc-comment{margin-top:8px;font-size:12px;color:#888;font-style:italic;border-top:1px solid #f0f0f0;padding-top:8px;display:none}
+.dc-comment.has-comment{display:block}
+.dc-edit-btn{margin-top:8px;width:100%;padding:5px;font-size:11px;color:#888;background:none;border:1px dashed #ddd;border-radius:5px;cursor:pointer}
+.dc-edit-btn:hover{color:#1a6fc4;border-color:#1a6fc4;background:#f5f9ff}
+
+/* MODAL COMMENTAIRE */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:420px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.modal .modal-sub{font-size:12px;color:#888;margin-bottom:12px}
+.modal textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:13px;resize:vertical;min-height:80px;font-family:inherit}
+.modal textarea:focus{outline:none;border-color:#1a6fc4}
+.modal-actions{display:flex;gap:8px;margin-top:12px;justify-content:flex-end}
+.btn-save{background:#1a6fc4;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-save:hover{background:#1560a8}
+.btn-save:disabled{background:#aaa;cursor:not-allowed}
+.btn-cancel{background:#fff;color:#666;border:1px solid #ddd;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer}
+.btn-cancel:hover{background:#f5f5f5}
+.modal-msg{font-size:12px;color:#27ae60;margin-top:6px;min-height:16px}
+
+@media(max-width:580px){
+  .summary{grid-template-columns:repeat(2,1fr)}
+  .card-val{font-size:16px}
+  .dir-grid{grid-template-columns:1fr}
+  .app-header h1{font-size:13px}
+}
 </style>
 </head>
 <body>
 
-<h1>Calculateur de paie — Hard Boat XXL</h1>
-<p class="sub">Parcexpo · Villefranche-sur-Saône · 04.04.2026</p>
+<div class="app-header">
+  <h1>⚡ Hard Boat XXL — Staff Manager</h1>
+  <span class="info">Parcexpo · Villefranche-sur-Saône · 04.04.2026</span>
+</div>
 
-<div class="rates">
-  <div class="rate-box">
-    <span>Taux salarié :</span>
-    <input type="number" id="rsa" value="13" min="0" step="0.5"> €/h net
+<div class="tabs">
+  <div class="tab on" onclick="switchTab('paie',this)">💶 Calcul de paie</div>
+  <div class="tab" onclick="switchTab('rep',this)">👥 Répertoire staff</div>
+</div>
+
+<!-- ═══════════════ ONGLET PAIE ═══════════════ -->
+<div class="pane on" id="pane-paie">
+
+  <div class="rates">
+    <div class="rate-box">Taux salarié : <input type="number" id="rsa" value="13" min="0" step="0.5"> €/h net</div>
+    <div class="rate-box">Taux auto-entr. : <input type="number" id="rae" value="21" min="0" step="0.5"> €/h HT</div>
   </div>
-  <div class="rate-box">
-    <span>Taux auto-entrepreneur :</span>
-    <input type="number" id="rae" value="21" min="0" step="0.5"> €/h HT
+
+  <div class="summary">
+    <div class="card"><div class="card-label">Staff total</div><div class="card-val" id="s-n">45</div></div>
+    <div class="card"><div class="card-label">Total heures</div><div class="card-val c-blue" id="s-h">0 h</div></div>
+    <div class="card"><div class="card-label">Masse salariale</div><div class="card-val c-gold" id="s-p">0,00 €</div></div>
+    <div class="card"><div class="card-label">Sans heures</div><div class="card-val c-red" id="s-m">45</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <button class="btn on" onclick="filt('all',this)">Tous</button>
+      <button class="btn" onclick="filt('SA',this)">Salariés</button>
+      <button class="btn" onclick="filt('AE',this)">Auto-entr.</button>
+      <button class="btn" onclick="filt('miss',this)">⚠ Sans heures</button>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="btn btn-green" onclick="toggleAdd()">+ Ajouter</button>
+      <button class="btn btn-gold" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+  </div>
+
+  <div class="add-panel" id="add-panel" style="display:none">
+    <h3>+ Membre de dernière minute</h3>
+    <div class="add-form">
+      <input type="text" id="a-nom" placeholder="Nom">
+      <input type="text" id="a-pre" placeholder="Prénom">
+      <select id="a-st" onchange="updateTaux()">
+        <option value="SA">Salarié</option>
+        <option value="AE">Auto-entr.</option>
+      </select>
+      <span class="taux-lbl" id="taux-lbl">→ 13 €/h</span>
+      <button class="btn-valider" id="btn-val" onclick="valider()">✓ Valider</button>
+    </div>
+    <div class="add-msg" id="add-msg"></div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th style="width:24px">#</th>
+        <th>Nom — Prénom</th>
+        <th>Statut</th>
+        <th class="r" style="width:70px">Heures</th>
+        <th class="r" style="width:76px">Taux €/h</th>
+        <th class="r" style="width:90px">Total</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+      <tfoot><tr>
+        <td colspan="3" style="color:#999;font-size:12px">Total</td>
+        <td class="r" id="f-h">0 h</td>
+        <td></td>
+        <td class="r" id="f-p">0,00 €</td>
+      </tr></tfoot>
+    </table>
   </div>
 </div>
 
-<div class="summary">
-  <div class="card"><div class="card-label">Staff total</div><div class="card-value">41</div></div>
-  <div class="card"><div class="card-label">Total heures</div><div class="card-value cv-blue" id="sh">0</div></div>
-  <div class="card"><div class="card-label">Masse salariale</div><div class="card-value cv-gold" id="sp">0,00 €</div></div>
+<!-- ═══════════════ ONGLET RÉPERTOIRE ═══════════════ -->
+<div class="pane" id="pane-rep">
+  <div class="dir-toolbar">
+    <input class="dir-search" type="text" placeholder="Rechercher un nom, email, téléphone…" oninput="searchDir(this.value)">
+    <button class="btn" onclick="filterDir('all',this)" id="df-all" style="border-color:#1a6fc4;color:#1a6fc4">Tous</button>
+    <button class="btn" onclick="filterDir('SA',this)">Salariés</button>
+    <button class="btn" onclick="filterDir('AE',this)">Auto-entr.</button>
+  </div>
+  <div class="dir-grid" id="dir-grid"></div>
 </div>
 
-<div class="table-wrap">
-<table>
-  <thead><tr>
-    <th>#</th><th>Nom — Prénom</th><th>Statut</th><th>H. conv.</th>
-    <th class="r">Heures</th><th class="r">Taux</th><th class="r">Total</th>
-  </tr></thead>
-  <tbody id="tb"></tbody>
-  <tfoot><tr>
-    <td colspan="4"></td>
-    <td class="r" id="fh">0 h</td>
-    <td></td>
-    <td class="r" id="fp">0,00 €</td>
-  </tr></tfoot>
-</table>
+<!-- MODAL COMMENTAIRE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Commentaire</h3>
+    <div class="modal-sub" id="modal-sub"></div>
+    <textarea id="modal-txt" placeholder="Ajouter un commentaire sur ce membre du staff…"></textarea>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" id="modal-save" onclick="saveComment()">💾 Enregistrer</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const SA="Salarié",AE="Auto-entr.";
-const data=[
-  ["Bacon","Romain","18h",SA],["Banes","Michelle","21h",SA],
-  ["Barbet","Loona","18h",AE],["BARKA","Riyad","18h",SA],
-  ["Bastien","Paul","18h",SA],["Beau","Olivier","18h",SA],
-  ["Benkhoris","Elodie","18h",SA],["Billuart","Antoine","18h",AE],
-  ["Boucaud","Zoé","18h",SA],["Bouthenet","Manon","18h",SA],
-  ["CADOT","Marine","18h",SA],["CARRON","Titouan","18h",SA],
-  ["Chaintron","Charlotte","18h",AE],["DA SILVA","Alexandre","18h",SA],
-  ["Da Silva","Sonia","18h",AE],["De Pecol","Mickael","18h",SA],
-  ["Durand","Jennifer","18h",SA],["Duvert","Axelle","21h",SA],
-  ["Favre","Yoann","18h",AE],["Francoz","Florian","18h",AE],
-  ["GEOFFEOY","Méline","18h",SA],["Geoffroy","Jeanne","18h",SA],
-  ["Giroud","Clément","18h",AE],["Givord","Hugo","18h",AE],
-  ["Graffion","Fannie","18h",SA],["Humblot","Letitia","18h",AE],
-  ["Jacuszin","Laura","18h",SA],["Karabela-Kahveci","Ambrine","18h",SA],
-  ["Laffi","Rania","18h",SA],["Lemaille","Nadège","18h",AE],
-  ["Libourel","Hortense","18h",AE],["Macia","Marie","18h",SA],
-  ["Mathiot","Noémie","18h",SA],["Merle","Estelle","18h",SA],
-  ["Montreuil","Mackinlay","18h",SA],["Ratel","Valentine","18h",SA],
-  ["Roux","Alexandre","18h",SA],["Salut","Gabriel","18h",SA],
-  ["Silvy","Marie","18h",SA],["SIVASLEIAN","Alexandre","18h",AE],
-  ["Trouve","Guillaume","18h",AE]
-];
-const hrs=new Array(data.length).fill(0);
-const fmt=n=>n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
-const rsa=()=>parseFloat(document.getElementById('rsa').value)||13;
-const rae=()=>parseFloat(document.getElementById('rae').value)||21;
-const rate=s=>s===SA?rsa():rae();
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+const AT_URL  = 'https://api.airtable.com/v0/appkT63TA2oDL2wO8/tbltkNkzLssVqmdBZ';
+const AT_TOK  = 'patIZD5Vl1YPGnCt7.65b2779178acce4f32c25d37bcceeca767cedf13df77428ef492fbb8cb714209';
+const AT_LINK = 'https://airtable.com/appkT63TA2oDL2wO8/tbltkNkzLssVqmdBZ/';
+const F_NOM   = 'fldGlMe9TgHi3qHky';
+const F_MAIL  = 'fldhd01iZ9MW4NDpm';
+const F_TEL   = 'fldRkE43xCWZbvVCF';
+const F_STAT  = 'fldU9V8QS70udGLES';
+const F_CONT  = 'fld4yI08gqjWbVSij';
+const F_COMM  = 'fldJRk3jcGznqFaGc';
+const SA = 'Salarié', AE = 'Auto-entr.';
 
-function build(){
-  const tb=document.getElementById('tb');
-  tb.innerHTML='';
-  data.forEach(([nom,prenom,hc,st],i)=>{
-    const tr=document.createElement('tr');
+// ── DATA (depuis Airtable) ─────────────────────────────────────────────────
+// [Nom, Prénom, Statut, RecordID, Email, Tel, Commentaire, isNew]
+let staff = [
+  ['Bacon','Romain',SA,'rechTO8IdeJ2WJogc','69200romain@gmail.com','0660184062','',false],
+  ['Banes','Michelle',SA,'recC8IeJuk1aGD2fa','michellebanes@protonmail.com','0617880749','',false],
+  ['Barbet','Loona',AE,'recQ5BVAdMvksIWiB','loonabarbet@gmail.com','0627575143','',false],
+  ['BARKA','Riyad',SA,'recQMue6L9MvgOBVw','riyad_b42@hotmail.fr','0623656871','',false],
+  ['Bastien','Paul',SA,'rec7xbwskQWaJGzdZ','Bastien.paul@lamache.org','0621726188','',false],
+  ['Beau','Olivier',SA,'recmVIKLgZaG9l0v4','olivier.beau38@gmail.com','0670381886','',false],
+  ['Benkhoris','Elodie',SA,'recf1xrwNaomUCu4w','Benkhoris.elodie@hotmail.com','0750354753','',false],
+  ['Billuart','Antoine',AE,'rec2zgcocLd084Qso','Billuart.a@gmail.com','0632741307','',false],
+  ['Boucaud','Zoé',SA,'recuNpr0RiJADCrFK','zoe041621@gmail.com','0777109495','',false],
+  ['Bouthenet','Manon',SA,'recF9UPc3rtogLDXI','manon.bouthenet1608@gmail.com','0683400046','',false],
+  ['CADOT','Marine',SA,'rec07rkpai50WrQgZ','Marinecadot@hotmail.fr','0669246518','',false],
+  ['CARRON','Titouan',SA,'reclI9BqoqK1mEFEA','Titouan.carron@gmail.com','0783100911','',false],
+  ['Chaintron','Charlotte',AE,'rec84IiBqQenRYRzP','charlotte.chaintron@gmail.com','0786455268','',false],
+  ['DA SILVA','Alexandre',SA,'reciDl73MfAjPjNTa','Dasilvamaga@gmail.com','0778091221','',false],
+  ['Da Silva','Sonia',AE,'recl8j6blcrVgXh1u','Sonia_900@live.fr','0652169797','',false],
+  ['De Pecol','Mickael',SA,'rec3Svc02Dp5jc1Zc','Micky2pec@hotmail.fr','0632319594','',false],
+  ['Durand','Jennifer',SA,'recTm8NwPj2uJcSyU','Jenny.durd1989gmail.com','0631839591','',false],
+  ['Duthoo','Sammy',SA,'reclbgZY6a7BXiyXw','','','',false],
+  ['Duvert','Axelle',SA,'recqoVMwvF8Nwvt2f','axelle.duvert@gmail.com','0652142044','',false],
+  ['Favre','Yoann',AE,'recJavmlaNglkWdbD','yoannfavre@ymail.com','0663418717','',false],
+  ['Francoz','Florian',AE,'recd3oDq3Z87Jez4Q','florianfrancoz@yahoo.fr','0620403593','',false],
+  ['Garcia','Jean-Marc',SA,'rec861b5fkXT5Mzlg','','','',false],
+  ['GEOFFEOY','Méline',SA,'rec9ud2hnmoK4HGBE','melinegeoffroy2402@gmail.com','0767282906','',false],
+  ['Geoffroy','Jeanne',SA,'recf9ht5Do9ylNx2B','jeannegeoffroy3108@gmail.com','0783619354','',false],
+  ['Giroud','Clément',AE,'recYrMst9Sx8KMyV1','Clement.giroud@icloud.com','0668570566','',false],
+  ['Givord','Hugo',AE,'rec8ERbbAqkI9zcPY','hugotab69@gmail.com','0769956469','',false],
+  ['Graffion','Fannie',SA,'rectAfIeVzPeiRadV','Graffion.fannie@gmail.com','0632555971','',false],
+  ['Humblot','Letitia',AE,'recqc7Unt9ubalGbA','Leti.loulette@hotmail.fr','0635054836','',false],
+  ['Jacuszin','Laura',SA,'recBeKx8kGqXFtxd1','laurajacuszin@gmail.com','0634011018','',false],
+  ['Karabela-Kahveci','Ambrine',SA,'rec2pZYgN58oOxauF','ambrine.kara69@icloud.com','0613908714','',false],
+  ['Laffi','Rania',SA,'recFVQaKZdMe0gm6t','ranialaffi9@gmail.com','0769488898','',false],
+  ['Lemaille','Nadège',AE,'recF6OtiSaWVN47Wr','nad.19@hotmail.fr','0778804022','',false],
+  ['Libourel','Hortense',AE,'recPolPamup8fzTaK','h.libourel@gmail.com','0750430698','',false],
+  ['Macia','Marie',SA,'recPVzc7CYOhz1UHG','marie.macia@laposte.net','0667903743','',false],
+  ['Mathiot','Noémie',SA,'reci84LF2dtm1UqEN','noemiemathiot@yahoo.fr','0769422074','',false],
+  ['Merle','Estelle',SA,'recOki4EdpIyfIWez','merleestelle@yahoo.com','0638494556','',false],
+  ['Montreuil','Mackinlay',SA,'reclNHxAqKvCyp0k1','montreuil.offi@gmail.com','0663295145','',false],
+  ['Ratel','Valentine',SA,'recdn55uQn0aSBggV','prlibilou184.vr@gmail.com','0699445604','',false],
+  ['Roux','Alexandre',SA,'rec1NerylM2FNrpzU','alexroux3112@gmail.com','0682467567','',false],
+  ['Salut','Gabriel',SA,'recLHGvGrsexj3rdK','gabrielsalut27@gmail.com','0679035193','',false],
+  ['Silvy','Marie',SA,'recAeNQtqAHjnJIcv','Mariesilvy@gmail.com','0662587511','',false],
+  ['SIVASLEIAN','Alexandre',AE,'rec07Z8vDsqlZxZW7','alexandre_sivasleian@hotmail.com','0614710460','',false],
+  ['Trouve','Guillaume',AE,'recLn3JTWj223lY9R','Guillaumetrouve37000@gmail.com','0786849826','',false],
+];
+
+let hrs   = staff.map(()=>0);
+let rates = staff.map(()=>null);
+let activeF = 'all';
+let dirFilter = 'all';
+let dirSearch = '';
+let modalIdx = -1;
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+const fmt = n => n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const defR = st => st===SA ? (parseFloat(document.getElementById('rsa').value)||13) : (parseFloat(document.getElementById('rae').value)||21);
+const getR = i => rates[i]!==null ? rates[i] : defR(staff[i][2]);
+const initials = (nom,pre) => ((nom[0]||'')+(pre[0]||'')).toUpperCase();
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(id, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pane-'+id).classList.add('on');
+  if(id==='rep') renderDir();
+}
+
+// ── PAIE : RENDER ──────────────────────────────────────────────────────────
+function renderPaie(){
+  const tb = document.getElementById('tb');
+  tb.innerHTML = '';
+  staff.forEach(([nom,pre,st,rid,,,, isNew],i)=>{
+    const h=hrs[i];
+    const show = activeF==='all'||(activeF==='SA'&&st===SA)||(activeF==='AE'&&st===AE)||(activeF==='miss'&&h===0);
+    if(!show) return;
+    const r=getR(i), pay=h*r;
+    const nm = rid
+      ? `<a class="at" href="${AT_LINK}${rid}" target="_blank"><b>${nom}</b> ${pre}<span class="at-ico">↗</span></a>`
+      : `<b>${nom}</b> ${pre}`;
+    const tag = isNew ? '<span class="new-tag">nouveau</span>' : '';
+    const tr = document.createElement('tr');
+    if(isNew) tr.classList.add('new-row');
     tr.innerHTML=`
-      <td style="color:#999;font-size:11px">${i+1}</td>
-      <td><strong>${nom}</strong> ${prenom}</td>
+      <td style="color:#ccc;font-size:11px">${i+1}</td>
+      <td>${nm}${tag}</td>
       <td><span class="badge ${st===SA?'bsa':'bae'}">${st}</span></td>
-      <td style="color:#888">${hc}</td>
-      <td class="r"><input type="number" min="0" max="24" step="0.5" placeholder="0"
-        style="width:58px;text-align:right;padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px"
-        data-i="${i}" oninput="upd(this)"></td>
-      <td class="r" style="color:#888" id="rt${i}">${rate(st)} €</td>
-      <td class="r" style="color:#bbb" id="tt${i}">—</td>`;
+      <td class="r"><input class="hi${h===0?' empty':''}" type="number" min="0" max="24" step="0.5" placeholder="—" value="${h||''}" data-i="${i}" oninput="setH(this)"></td>
+      <td class="r"><input class="ri" type="number" min="0" step="0.5" value="${r}" data-i="${i}" oninput="setR(this)"></td>
+      <td class="r" style="font-weight:600;color:${pay>0?'#222':'#ccc'}" id="t${i}">${pay>0?fmt(pay):'—'}</td>`;
     tb.appendChild(tr);
   });
-  refresh();
+  document.getElementById('s-n').textContent = staff.length;
+  syncStats();
 }
 
-function upd(el){hrs[+el.dataset.i]=parseFloat(el.value)||0;refresh();}
+function setH(el){
+  const i=+el.dataset.i; hrs[i]=parseFloat(el.value)||0;
+  el.classList.toggle('empty',hrs[i]===0);
+  const tc=document.getElementById('t'+i);
+  if(tc){const p=hrs[i]*getR(i);tc.textContent=p>0?fmt(p):'—';tc.style.color=p>0?'#222':'#ccc';}
+  syncStats();
+}
+function setR(el){
+  const i=+el.dataset.i; rates[i]=parseFloat(el.value)||defR(staff[i][2]);
+  const tc=document.getElementById('t'+i);
+  if(tc){const p=hrs[i]*rates[i];tc.textContent=p>0?fmt(p):'—';tc.style.color=p>0?'#222':'#ccc';}
+  syncStats();
+}
+function syncStats(){
+  let th=0,tp=0,miss=0;
+  staff.forEach((_,i)=>{th+=hrs[i];tp+=hrs[i]*getR(i);if(hrs[i]===0)miss++;});
+  document.getElementById('s-h').textContent=th+' h';
+  document.getElementById('s-p').textContent=fmt(tp);
+  document.getElementById('s-m').textContent=miss;
+  document.getElementById('s-m').className='card-val '+(miss>0?'c-red':'c-green');
+  document.getElementById('f-h').textContent=th+' h';
+  document.getElementById('f-p').textContent=fmt(tp);
+}
+function filt(f,btn){
+  activeF=f;
+  document.querySelectorAll('.filters .btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); renderPaie();
+}
+document.getElementById('rsa').addEventListener('input',()=>{updateTaux();renderPaie();});
+document.getElementById('rae').addEventListener('input',()=>{updateTaux();renderPaie();});
 
-function refresh(){
-  let th=0,tp=0;
-  data.forEach(([,,_,st],i)=>{
-    const r=rate(st),h=hrs[i],pay=h*r;
-    th+=h;tp+=pay;
-    document.getElementById('rt'+i).textContent=r+' €';
-    const tc=document.getElementById('tt'+i);
-    tc.textContent=h>0?fmt(pay):'—';
-    tc.style.color=h>0?'#222':'#bbb';
+// ── AJOUT ──────────────────────────────────────────────────────────────────
+function toggleAdd(){
+  const p=document.getElementById('add-panel');
+  p.style.display=p.style.display==='none'?'block':'none';
+  if(p.style.display==='block'){document.getElementById('a-nom').focus();updateTaux();}
+}
+function updateTaux(){
+  const st=document.getElementById('a-st').value;
+  const r=st==='SA'?(parseFloat(document.getElementById('rsa').value)||13):(parseFloat(document.getElementById('rae').value)||21);
+  document.getElementById('taux-lbl').textContent='→ '+r+' €/h';
+}
+function setMsg(txt,type){const el=document.getElementById('add-msg');el.textContent=txt;el.className='add-msg '+type;}
+
+async function valider(){
+  const nom=(document.getElementById('a-nom').value||'').trim();
+  const pre=(document.getElementById('a-pre').value||'').trim();
+  const stv=document.getElementById('a-st').value;
+  if(!nom&&!pre){document.getElementById('a-nom').focus();return;}
+  const st=stv==='AE'?AE:SA;
+  const statRaw=stv==='AE'?'Auto-entrepreneur':'Salarié déclaré';
+  const btn=document.getElementById('btn-val');
+  btn.disabled=true; setMsg('Sync Airtable…','loading');
+  try{
+    const resp=await fetch(AT_URL,{method:'POST',
+      headers:{'Authorization':'Bearer '+AT_TOK,'Content-Type':'application/json'},
+      body:JSON.stringify({records:[{fields:{[F_NOM]:`${nom} ${pre}`.trim(),[F_STAT]:statRaw,[F_CONT]:'NC'}}],typecast:true})});
+    const res=await resp.json();
+    if(!resp.ok)throw new Error(res.error?.message||'Erreur');
+    const rid=res.records[0].id;
+    staff.push([nom,pre,st,rid,'','','',true]);
+    hrs.push(0); rates.push(null);
+    document.getElementById('a-nom').value='';
+    document.getElementById('a-pre').value='';
+    setMsg(`✓ ${nom} ${pre} ajouté(e) dans Airtable !`,'ok');
+    activeF='all';
+    document.querySelectorAll('.filters .btn').forEach((b,i)=>{b.classList.toggle('on',i===0);});
+    renderPaie();
+    setTimeout(()=>{
+      const rows=document.querySelectorAll('#tb tr.new-row');
+      if(rows.length)rows[rows.length-1].scrollIntoView({behavior:'smooth',block:'center'});
+    },100);
+  }catch(e){
+    staff.push([nom,pre,st,null,'','','',true]);
+    hrs.push(0); rates.push(null);
+    setMsg('⚠ Ajouté localement (erreur: '+e.message+')','err');
+    renderPaie();
+  }finally{btn.disabled=false;}
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('add-panel').style.display==='block') valider();
+});
+
+// ── EXPORT CSV (corrigé) ───────────────────────────────────────────────────
+function exportCSV(){
+  const rows=[['Nom','Prénom','Statut','Heures travaillées','Taux €/h','Total €']];
+  staff.forEach(([n,p,,,,,,], i)=>{
+    const r=getR(i);
+    rows.push([n, p, staff[i][2], hrs[i], r.toFixed(2), (hrs[i]*r).toFixed(2)]);
   });
-  document.getElementById('sh').textContent=th;
-  document.getElementById('sp').textContent=fmt(tp);
-  document.getElementById('fh').textContent=th+' h';
-  document.getElementById('fp').textContent=fmt(tp);
+  const tH=hrs.reduce((a,b)=>a+b,0);
+  const tP=staff.reduce((s,_,i)=>s+hrs[i]*getR(i),0);
+  rows.push(['','','TOTAL',tH,'',tP.toFixed(2)]);
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='paie-hardboat-xxl-04042026.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-document.getElementById('rsa').addEventListener('input',refresh);
-document.getElementById('rae').addEventListener('input',refresh);
-build();
+// ── RÉPERTOIRE ─────────────────────────────────────────────────────────────
+function renderDir(){
+  const grid=document.getElementById('dir-grid');
+  grid.innerHTML='';
+  const q=dirSearch.toLowerCase();
+  staff.forEach(([nom,pre,st,rid,mail,tel,comment],i)=>{
+    const full=(nom+' '+pre).toLowerCase();
+    const matchSearch=!q||full.includes(q)||(mail||'').toLowerCase().includes(q)||(tel||'').includes(q);
+    const matchFilter=dirFilter==='all'||(dirFilter==='SA'&&st===SA)||(dirFilter==='AE'&&st===AE);
+    if(!matchSearch||!matchFilter) return;
+    const av=initials(nom,pre);
+    const div=document.createElement('div');
+    div.className='dir-card';
+    div.innerHTML=`
+      <div class="dc-top">
+        <div class="dc-avatar ${st===SA?'av-sa':'av-ae'}">${av}</div>
+        <div>
+          <div class="dc-name">${nom} ${pre}</div>
+          <span class="badge ${st===SA?'bsa':'bae'} dc-badge">${st}</span>
+        </div>
+        ${rid?`<a class="at" href="${AT_LINK}${rid}" target="_blank" style="margin-left:auto;font-size:11px;opacity:.5">↗</a>`:''}
+      </div>
+      <div class="dc-info">
+        ${mail?`📧 <a href="mailto:${mail}">${mail}</a><br>`:''}
+        ${tel?`📞 <a href="tel:${tel}">${tel}</a>`:''}
+      </div>
+      <div class="dc-comment${comment?' has-comment':''}" id="comm-${i}">${comment||''}</div>
+      <button class="dc-edit-btn" onclick="openModal(${i})">✏ ${comment?'Modifier':'Ajouter'} un commentaire</button>`;
+    grid.appendChild(div);
+  });
+}
+
+function searchDir(v){dirSearch=v;renderDir();}
+function filterDir(f,btn){
+  dirFilter=f;
+  document.querySelectorAll('.dir-toolbar .btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); renderDir();
+}
+
+// ── MODAL COMMENTAIRE ──────────────────────────────────────────────────────
+function openModal(i){
+  modalIdx=i;
+  const [nom,pre,,,,,comment]=staff[i];
+  document.getElementById('modal-title').textContent=`${nom} ${pre}`;
+  document.getElementById('modal-sub').textContent='Commentaire interne (synchronisé dans Airtable)';
+  document.getElementById('modal-txt').value=comment||'';
+  document.getElementById('modal-msg').textContent='';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-txt').focus(),100);
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  modalIdx=-1;
+}
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal')) closeModal();
+});
+
+async function saveComment(){
+  if(modalIdx<0) return;
+  const txt=document.getElementById('modal-txt').value.trim();
+  const btn=document.getElementById('modal-save');
+  const msgEl=document.getElementById('modal-msg');
+  btn.disabled=true; msgEl.textContent='Enregistrement…'; msgEl.style.color='#888';
+  const rid=staff[modalIdx][3];
+  try{
+    if(rid){
+      const resp=await fetch(AT_URL+'/'+rid,{method:'PATCH',
+        headers:{'Authorization':'Bearer '+AT_TOK,'Content-Type':'application/json'},
+        body:JSON.stringify({fields:{[F_COMM]:txt}})});
+      if(!resp.ok){const r=await resp.json();throw new Error(r.error?.message||'Erreur');}
+    }
+    staff[modalIdx][6]=txt;
+    msgEl.textContent='✓ Enregistré !'; msgEl.style.color='#27ae60';
+    setTimeout(()=>{closeModal();renderDir();},700);
+  }catch(e){
+    staff[modalIdx][6]=txt; // save locally anyway
+    msgEl.textContent='Sauvegardé localement (erreur Airtable: '+e.message+')';
+    msgEl.style.color='#c0392b';
+    setTimeout(()=>{closeModal();renderDir();},1500);
+  }finally{btn.disabled=false;}
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+renderPaie();
 </script>
 </body>
 </html>
